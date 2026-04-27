@@ -30,6 +30,8 @@ const eventReducer = (state, action) => {
           ? { ...event, status: event.status === 'Pending' ? 'Completed' : 'Pending' }
           : event
       );
+    case 'SYNC':
+      return action.payload;
     default:
       return state;
   }
@@ -48,6 +50,22 @@ export const EventProvider = ({ children }) => {
       console.error('Failed to save events to localStorage:', error);
     }
   }, [events]);
+
+  // Sync events in real-time across tabs/windows via the storage event
+  useEffect(() => {
+    const handleStorageChange = (e) => {
+      if (e.key === STORAGE_KEY && e.newValue) {
+        try {
+          const updated = JSON.parse(e.newValue);
+          dispatch({ type: 'SYNC', payload: updated });
+        } catch {
+          // ignore malformed data
+        }
+      }
+    };
+    window.addEventListener('storage', handleStorageChange);
+    return () => window.removeEventListener('storage', handleStorageChange);
+  }, []);
 
   return (
     <EventContext.Provider value={{ events, dispatch }}>
