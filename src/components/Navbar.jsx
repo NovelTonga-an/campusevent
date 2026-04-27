@@ -1,9 +1,13 @@
+import { useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authcontext';
+import useScrollDirection from '../hooks/useScrollDirection';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { scrollDirection, scrollY } = useScrollDirection();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const navItems = [
     { to: '/', label: 'Home', end: true },
@@ -14,10 +18,16 @@ const Navbar = () => {
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setMobileMenuOpen(false);
   };
 
+  const closeMobileMenu = () => setMobileMenuOpen(false);
+
+  // Show navbar when at top or scrolling up, hide when scrolling down (mobile only)
+  const isNavVisible = scrollDirection === 'up' || scrollY < 100;
+
   return (
-    <header className="site-header">
+    <header className={`site-header${isNavVisible ? '' : ' site-header--hidden'}`}>
       <nav className="campus-navbar" aria-label="Primary navigation">
         <Link to="/" className="campus-navbar__brand">
           <span className="campus-navbar__crest">CE</span>
@@ -26,44 +36,60 @@ const Navbar = () => {
           </span>
         </Link>
 
-        <div className="campus-navbar__links">
-          {navItems.map(({ to, label, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `campus-navbar__link${isActive ? ' campus-navbar__link--active' : ''}`
-              }
-            >
-              {label}
-            </NavLink>
-          ))}
+        <div className={`campus-navbar__menu${mobileMenuOpen ? ' campus-navbar__menu--open' : ''}`}>
+          <div className="campus-navbar__links">
+            {navItems.map(({ to, label, end }) => (
+              <NavLink
+                key={to}
+                to={to}
+                end={end}
+                className={({ isActive }) =>
+                  `campus-navbar__link${isActive ? ' campus-navbar__link--active' : ''}`
+                }
+                onClick={closeMobileMenu}
+              >
+                {label}
+              </NavLink>
+            ))}
+          </div>
+
+          <div className="campus-navbar__actions">
+            {user ? (
+              <>
+                <span className="campus-navbar__status">{user.name}</span>
+                <button
+                  type="button"
+                  className="campus-navbar__cta campus-navbar__logout"
+                  onClick={handleLogout}
+                >
+                  Log Out
+                </button>
+              </>
+            ) : (
+              <NavLink
+                to="/login"
+                className={({ isActive }) =>
+                  `campus-navbar__cta${isActive ? ' campus-navbar__cta--active' : ''}`
+                }
+                onClick={closeMobileMenu}
+              >
+                Log In
+              </NavLink>
+            )}
+          </div>
         </div>
 
-        <div className="campus-navbar__actions">
-          {user ? (
-            <>
-              <span className="campus-navbar__status">{user.name}</span>
-              <button
-                type="button"
-                className="campus-navbar__cta campus-navbar__logout"
-                onClick={handleLogout}
-              >
-                Log Out
-              </button>
-            </>
-          ) : (
-            <NavLink
-              to="/login"
-              className={({ isActive }) =>
-                `campus-navbar__cta${isActive ? ' campus-navbar__cta--active' : ''}`
-              }
-            >
-              Log In
-            </NavLink>
-          )}
-        </div>
+        <button
+          type="button"
+          className={`campus-navbar__toggle${mobileMenuOpen ? ' campus-navbar__toggle--active' : ''}`}
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle navigation menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
       </nav>
     </header>
   );
