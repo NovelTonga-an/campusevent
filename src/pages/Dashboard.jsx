@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useEvents } from '../context/eventcontext';
 
 const Dashboard = () => {
-  const { events, loading, addEvent, deleteEvent, toggleStatus } = useEvents();
+  const { events, loading, error, addEvent, deleteEvent, toggleStatus } = useEvents();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('Pending');
@@ -32,6 +32,7 @@ const Dashboard = () => {
           <p className="dashboard-toolbar__meta">
             {loading ? 'Loading…' : `${events.length} total event${events.length === 1 ? '' : 's'}`}
           </p>
+          {error ? <p className="events-state">{error}</p> : null}
         </div>
         <button type="button" className="dashboard-toolbar__add" onClick={openModal}>
           Add new event
