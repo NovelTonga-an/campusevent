@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useEvents } from '../context/eventcontext';
 
 const Dashboard = () => {
-  const { events, dispatch } = useEvents();
+  const { events, loading, addEvent, deleteEvent, toggleStatus } = useEvents();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [title, setTitle] = useState('');
   const [status, setStatus] = useState('Pending');
@@ -15,19 +15,12 @@ const Dashboard = () => {
     setStatus('Pending');
   };
 
-  const addEvent = (e) => {
+  const handleAddEvent = async (e) => {
     e.preventDefault();
-    const newEvent = {
-      id: Date.now(),
-      title: title.trim(),
-      status,
-    };
-
-    if (!newEvent.title) {
+    if (!title.trim()) {
       return;
     }
-
-    dispatch({ type: 'ADD_EVENT', payload: newEvent });
+    await addEvent({ title: title.trim(), status });
     closeModal();
   };
 
@@ -37,7 +30,7 @@ const Dashboard = () => {
         <div>
           <h2 className="dashboard-toolbar__title">Admin dashboard</h2>
           <p className="dashboard-toolbar__meta">
-            {events.length} total event{events.length === 1 ? '' : 's'}
+            {loading ? 'Loading…' : `${events.length} total event${events.length === 1 ? '' : 's'}`}
           </p>
         </div>
         <button type="button" className="dashboard-toolbar__add" onClick={openModal}>
@@ -47,9 +40,9 @@ const Dashboard = () => {
 
       <div className="dashboard-grid">
         {events.map((event) => (
-          <article key={event.id} className="dashboard-card">
+          <article key={event.firestoreId} className="dashboard-card">
             <div className="dashboard-card__top">
-              <span className="dashboard-card__id">Event #{event.id}</span>
+              <span className="dashboard-card__id">{event.title.slice(0, 2).toUpperCase()}</span>
               <span
                 className={`dashboard-card__status${
                   event.status === 'Completed' ? ' dashboard-card__status--complete' : ''
@@ -65,14 +58,14 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="dashboard-card__btn"
-                onClick={() => dispatch({ type: 'TOGGLE_STATUS', payload: event.id })}
+                onClick={() => toggleStatus(event.firestoreId, event.status)}
               >
                 Toggle status
               </button>
               <button
                 type="button"
                 className="dashboard-card__btn dashboard-card__btn--danger"
-                onClick={() => dispatch({ type: 'DELETE_EVENT', payload: event.id })}
+                onClick={() => deleteEvent(event.firestoreId)}
               >
                 Delete
               </button>
@@ -88,7 +81,7 @@ const Dashboard = () => {
       {isModalOpen ? (
         <div className="dashboard-modal" role="dialog" aria-modal="true" aria-labelledby="new-event-title">
           <div className="dashboard-modal__backdrop" onClick={closeModal} />
-          <form className="dashboard-modal__panel" onSubmit={addEvent}>
+          <form className="dashboard-modal__panel" onSubmit={handleAddEvent}>
             <h3 id="new-event-title" className="dashboard-modal__title">Add new event</h3>
 
             <label className="dashboard-modal__field" htmlFor="event-title">
