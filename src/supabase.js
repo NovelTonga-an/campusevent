@@ -22,7 +22,9 @@ const supabaseUrl = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_URL);
 const supabaseAnonKey = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 const isLikelySupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(supabaseUrl);
-const isLikelyAnonKey = supabaseAnonKey.startsWith('eyJ');
+const isLikelyAnonKey =
+  supabaseAnonKey.startsWith('eyJ') ||
+  supabaseAnonKey.startsWith('sb_publishable_');
 
 const hasValidConfig =
   supabaseUrl.trim().length > 0 &&
