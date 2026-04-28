@@ -18,7 +18,20 @@ const sanitizeEnvValue = (value) => {
   return trimmed;
 };
 
-const supabaseUrl = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_URL);
+const normalizeSupabaseUrl = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  try {
+    const parsed = new URL(value);
+    return parsed.origin;
+  } catch {
+    return value;
+  }
+};
+
+const supabaseUrl = normalizeSupabaseUrl(sanitizeEnvValue(import.meta.env.VITE_SUPABASE_URL));
 const supabaseAnonKey = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
 const isLikelySupabaseUrl = /^https:\/\//i.test(supabaseUrl);
