@@ -41,7 +41,7 @@ const Dashboard = () => {
 
       <div className="dashboard-grid">
         {events.map((event) => (
-          <article key={event.firestoreId} className="dashboard-card">
+          <article key={event.id} className="dashboard-card">
             <div className="dashboard-card__top">
               <span className="dashboard-card__id">{event.title.slice(0, 2).toUpperCase()}</span>
               <span
@@ -59,14 +59,14 @@ const Dashboard = () => {
               <button
                 type="button"
                 className="dashboard-card__btn"
-                onClick={() => toggleStatus(event.firestoreId, event.status)}
+                onClick={() => toggleStatus(event.id, event.status)}
               >
                 Toggle status
               </button>
               <button
                 type="button"
                 className="dashboard-card__btn dashboard-card__btn--danger"
-                onClick={() => deleteEvent(event.firestoreId)}
+                onClick={() => deleteEvent(event.id)}
               >
                 Delete
               </button>
