@@ -21,16 +21,12 @@ const sanitizeEnvValue = (value) => {
 const supabaseUrl = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_URL);
 const supabaseAnonKey = sanitizeEnvValue(import.meta.env.VITE_SUPABASE_ANON_KEY);
 
-const isLikelySupabaseUrl = /^https:\/\/[a-z0-9-]+\.supabase\.co$/i.test(supabaseUrl);
-const isLikelyAnonKey =
-  supabaseAnonKey.startsWith('eyJ') ||
-  supabaseAnonKey.startsWith('sb_publishable_');
+const isLikelySupabaseUrl = /^https:\/\//i.test(supabaseUrl);
 
 const hasValidConfig =
   supabaseUrl.trim().length > 0 &&
   supabaseAnonKey.trim().length > 0 &&
-  isLikelySupabaseUrl &&
-  isLikelyAnonKey;
+  isLikelySupabaseUrl;
 
 export const supabaseConfigError = hasValidConfig
   ? ''
@@ -38,6 +34,10 @@ export const supabaseConfigError = hasValidConfig
 
 if (supabaseConfigError) {
   console.error(supabaseConfigError);
+}
+
+if (hasValidConfig && !/supabase\.co/i.test(supabaseUrl)) {
+  console.warn('VITE_SUPABASE_URL does not look like a standard Supabase project URL.');
 }
 
 export const supabase = hasValidConfig ? createClient(supabaseUrl, supabaseAnonKey) : null;
