@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase } from '../supabase';
+import { supabase, supabaseConfigError } from '../supabase';
 
 const EventContext = createContext();
 
@@ -9,6 +9,12 @@ export const EventProvider = ({ children }) => {
   const [error, setError] = useState('');
 
   const loadEvents = async () => {
+    if (!supabase) {
+      setError(supabaseConfigError || 'Supabase client is not configured.');
+      setLoading(false);
+      return;
+    }
+
     const { data, error: fetchError } = await supabase
       .from('events')
       .select('*')
@@ -28,6 +34,12 @@ export const EventProvider = ({ children }) => {
 
   // Real-time listener — updates instantly on every device
   useEffect(() => {
+    if (!supabase) {
+      setError(supabaseConfigError || 'Supabase client is not configured.');
+      setLoading(false);
+      return () => {};
+    }
+
     loadEvents();
 
     const channel = supabase
@@ -52,6 +64,10 @@ export const EventProvider = ({ children }) => {
 
   const addEvent = async ({ title, status }) => {
     try {
+      if (!supabase) {
+        throw new Error(supabaseConfigError || 'Supabase client is not configured.');
+      }
+
       const { error: insertError } = await supabase.from('events').insert({
         title,
         status,
@@ -71,6 +87,10 @@ export const EventProvider = ({ children }) => {
 
   const deleteEvent = async (id) => {
     try {
+      if (!supabase) {
+        throw new Error(supabaseConfigError || 'Supabase client is not configured.');
+      }
+
       const { error: deleteError } = await supabase.from('events').delete().eq('id', id);
 
       if (deleteError) {
@@ -86,6 +106,10 @@ export const EventProvider = ({ children }) => {
 
   const toggleStatus = async (id, currentStatus) => {
     try {
+      if (!supabase) {
+        throw new Error(supabaseConfigError || 'Supabase client is not configured.');
+      }
+
       const { error: updateError } = await supabase
         .from('events')
         .update({
