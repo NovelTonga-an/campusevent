@@ -71,6 +71,7 @@ export const EventProvider = ({ children }) => {
       const { error: insertError } = await supabase.from('events').insert({
         title,
         status,
+        created_at: new Date().toISOString(),
       });
 
       if (insertError) {
@@ -80,7 +81,7 @@ export const EventProvider = ({ children }) => {
       setError('');
     } catch (addError) {
       console.error('Failed to add Supabase event:', addError);
-      setError('Unable to save the event. Check your Supabase table and policies.');
+      setError(`Unable to save the event. ${addError?.message || 'Check your Supabase table and policies.'}`);
       throw addError;
     }
   };
