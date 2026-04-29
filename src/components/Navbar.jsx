@@ -1,13 +1,34 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/authcontext';
-import useScrollDirection from '../hooks/useScrollDirection';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const { scrollDirection, scrollY } = useScrollDirection();
+  const [scrollDirection, setScrollDirection] = useState('up');
+  const [scrollY, setScrollY] = useState(0);
+  const lastScrollY = useRef(0);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY > lastScrollY.current + 10) {
+        setScrollDirection('down');
+      } else if (currentScrollY < lastScrollY.current - 10) {
+        setScrollDirection('up');
+      }
+
+      lastScrollY.current = currentScrollY;
+      setScrollY(currentScrollY);
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const navItems = [
     { to: '/', label: 'Home', end: true },
